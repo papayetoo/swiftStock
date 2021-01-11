@@ -118,7 +118,7 @@ class ViewController: UIViewController {
                 }
                 
                 DispatchQueue.main.sync {
-                1    let set = CandleChartDataSet(entries: yVal)
+                    let set = CandleChartDataSet(entries: yVal)
                     set.shadowColor = .white
                     set.shadowWidth = 0.7
                     set.increasingColor = .red
