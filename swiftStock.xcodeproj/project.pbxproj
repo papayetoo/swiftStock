@@ -15,6 +15,7 @@
 		007ED07225A340D50056B1D9 /* StockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007ED07125A340D50056B1D9 /* StockData.swift */; };
 		007ED07625A4934C0056B1D9 /* FlaskRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007ED07525A4934C0056B1D9 /* FlaskRequest.swift */; };
 		00A839D225A74645000E6B5A /* codes.csv in Resources */ = {isa = PBXBuildFile; fileRef = 00A839D125A74645000E6B5A /* codes.csv */; };
+		00DED38325AF0248001A4C9B /* SimpleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DED38225AF0248001A4C9B /* SimpleData.swift */; };
 		00EC148B25AC8E390016DAE4 /* StockChartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EC148A25AC8E390016DAE4 /* StockChartViewController.swift */; };
 		00EC148E25AC93C30016DAE4 /* StockCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EC148D25AC93C30016DAE4 /* StockCode.swift */; };
 		00EC149125AC96B10016DAE4 /* StockTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EC149025AC96B10016DAE4 /* StockTableViewCell.swift */; };
@@ -32,6 +33,7 @@
 		007ED07125A340D50056B1D9 /* StockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockData.swift; sourceTree = "<group>"; };
 		007ED07525A4934C0056B1D9 /* FlaskRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlaskRequest.swift; sourceTree = "<group>"; };
 		00A839D125A74645000E6B5A /* codes.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = codes.csv; sourceTree = "<group>"; };
+		00DED38225AF0248001A4C9B /* SimpleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleData.swift; sourceTree = "<group>"; };
 		00EC148A25AC8E390016DAE4 /* StockChartViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockChartViewController.swift; sourceTree = "<group>"; };
 		00EC148D25AC93C30016DAE4 /* StockCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockCode.swift; sourceTree = "<group>"; };
 		00EC149025AC96B10016DAE4 /* StockTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockTableViewCell.swift; sourceTree = "<group>"; };
@@ -85,6 +87,7 @@
 				00EC148A25AC8E390016DAE4 /* StockChartViewController.swift */,
 				00EC148D25AC93C30016DAE4 /* StockCode.swift */,
 				00EC149025AC96B10016DAE4 /* StockTableViewCell.swift */,
+				00DED38225AF0248001A4C9B /* SimpleData.swift */,
 			);
 			path = swiftStock;
 			sourceTree = "<group>";
@@ -224,6 +227,7 @@
 				00EC148E25AC93C30016DAE4 /* StockCode.swift in Sources */,
 				00EC149125AC96B10016DAE4 /* StockTableViewCell.swift in Sources */,
 				00178EC5258A319F00915568 /* ViewController.swift in Sources */,
+				00DED38325AF0248001A4C9B /* SimpleData.swift in Sources */,
 				007ED07625A4934C0056B1D9 /* FlaskRequest.swift in Sources */,
 				00178EC1258A319F00915568 /* AppDelegate.swift in Sources */,
 				00EC148B25AC8E390016DAE4 /* StockChartViewController.swift in Sources */,

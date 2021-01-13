@@ -19,27 +19,6 @@ class ViewController: UIViewController {
         return chartView
     }()
     
-    // MARK: CandleStickChartView 그리기 위함.
-    lazy var candleStickChartView : CandleStickChartView = {
-        let chartView = CandleStickChartView()
-        chartView.backgroundColor = .white
-        chartView.translatesAutoresizingMaskIntoConstraints = false
-        chartView.setScaleEnabled(true)
-        chartView.pinchZoomEnabled = true
-        chartView.legend.horizontalAlignment = .right
-        chartView.legend.verticalAlignment = .bottom
-        chartView.legend.orientation = .vertical
-        chartView.legend.drawInside = false
-        chartView.drawGridBackgroundEnabled = false
-        if let font = UIFont(name: "Helevetica-Nueue", size: 10){
-            chartView.legend.font = font
-        }
-        chartView.backgroundColor = .black
-        
-        chartView.drawGridBackgroundEnabled = false
-        return chartView
-    }()
-    
     
     // MARK: 종목코드를 표현하기 위한 TableView
     lazy var stockCodeTableView : UITableView = {
@@ -47,72 +26,75 @@ class ViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.backgroundColor = UIColor.white
         tableView.register(StockTableViewCell.self, forCellReuseIdentifier: "StockCode")
         return tableView
     }()
 
-    var candleData : [CandleChartDataEntry] = []
-    
-    // AWS EC2 server와 HTTP 통신하기 위한 session
-    let session: URLSession = URLSession(configuration: .default)
     
     lazy var tableData: [StockCode] = []
     
+    
+    let session = URLSession.shared
+    var closePriceData : [[Double]] = []{
+        didSet {
+            DispatchQueue.main.async {
+                print("didSet", self.closePriceData)
+                self.stockCodeTableView.reloadData()
+            }
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        let mainBackgroundColor = UIColor(rgb: 0xE7FDDF)
-        self.view.backgroundColor = mainBackgroundColor
+        // Do any additional setup after loading the
+        self.view.backgroundColor = UIColor.clear
         self.view.addSubview(self.stockCodeTableView)
         self.stockCodeTableView.snp.makeConstraints({
             $0.leading.trailing.top.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(0)
         })
         
-        self.setTableViewData()
-        
-        // MARK: candlestickChartView 테스트 코드
-//        self.view.addSubview(self.candleStickChartView)
-//        self.candleStickChartView.snp.makeConstraints({
-//            $0.leading.trailing.equalTo(self.view).offset(0)
-//            $0.top.equalTo(self.view).offset(0)
-//            $0.bottom.equalTo(self.view).offset(0)
-//        })
-//
-//        self.candleStickChartView.delegate = self
-//        self.stockPost()
+        DispatchQueue.global().async {
+            self.setTableViewData()
+            self.getClosePrice { data in
+                guard let decodedData = try? JSONDecoder().decode([String:[[Double]]].self, from: data) else{return}
+                guard let closePriceData = decodedData["closePrice"] else{return}
+                print(closePriceData)
+                self.closePriceData = closePriceData
+            }
+        }
     }
     
+    // MARK: setTableViewData 테이블 뷰 테스트 데이터
     func setTableViewData(){
         self.tableData.append(StockCode(code: "005930", name: "삼성전자"))
-        self.tableData.append(StockCode(code: "035420", name: "NAVER"))
-        self.tableData.append(StockCode(code: "035720", name: "카카오"))
-        self.tableData.append(StockCode(code: "005380", name: "현대차"))
+//        self.tableData.append(StockCode(code: "035420", name: "NAVER"))
+//        self.tableData.append(StockCode(code: "035720", name: "카카오"))
+//        self.tableData.append(StockCode(code: "005380", name: "현대차"))
     }
     
-    
-    func stockPost(){
-        guard let serverURL: URL = URL(string: "http://15.164.214.228:8000/getDf") else {return}
-        var request = URLRequest(url: serverURL)
-        let decoder = JSONDecoder()
+    // MARK: 서버에서부터 7일 전의 데이터를 받아오는 함수
+    func getClosePrice(completionHandler: @escaping (Data) -> Void){
+        print("getClosePrice")
+        let serverURL = URL(string: "http://15.164.214.228:8000")
+        guard let requestURL = serverURL?.appendingPathComponent("main") else {return}
+        var request = URLRequest(url: requestURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: 100)
+        let codeList = (0..<self.tableData.count).map{
+            return self.tableData[$0].companyCode
+        }
+        let jsonData = ["codes": codeList]
         
-        let param : [String: String] = ["code" : "005930"]
-        
-//        serverURL.appendPathComponent("getDf")
-    
         do{
-            // cachePolicy 때문에 만히 삽질함.
-            // cachePolicy 주의!!
-            request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
             request.httpMethod = "POST"
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
-            request.addValue("Mozilla/5.0", forHTTPHeaderField: "User-Agent")
-            request.httpBody = try JSONSerialization.data(withJSONObject: param, options: [.withoutEscapingSlashes, .prettyPrinted])
+            request.addValue("Mobile/iPhone", forHTTPHeaderField: "User-Agent")
+            request.httpBody = try JSONEncoder().encode(codeList)
         }catch (let err){
             print(err.localizedDescription)
         }
         
-        let task = session.dataTask(with: request) { (data, response, error) in
+        let requestTask = session.dataTask(with: request) { (data, response, error) in
             guard error == nil else{
                 print(error?.localizedDescription)
                 return
@@ -122,36 +104,10 @@ class ViewController: UIViewController {
                 return
             }
             
-            do{
-                let stockData = try decoder.decode(StockData.self, from: data)
-                let yVal = (0..<stockData.openPrice.count).map { (i) -> CandleChartDataEntry in
-                    let openPrice = stockData.openPrice[i]
-                    let closePrice = stockData.closePrice[i]
-                    let lowPrice = stockData.lowPrice[i]
-                    let highPrice = stockData.highPrice[i]
-                    // MARK: 정상적인 candlestick chart
-                    return CandleChartDataEntry(x: Double(i), shadowH: highPrice, shadowL: lowPrice, open: openPrice, close: closePrice)
-                }
-                
-                DispatchQueue.main.sync {
-                    let set = CandleChartDataSet(entries: yVal)
-                    set.shadowColor = .white
-                    set.shadowWidth = 0.7
-                    set.increasingColor = .red
-                    set.increasingFilled = true
-                    set.decreasingColor = .green
-                    set.decreasingFilled = true
-                    set.neutralColor = .blue
-                    set.drawValuesEnabled = true
-                    let data = CandleChartData(dataSet: set)
-                    self.candleStickChartView.data = data
-                    self.candleStickChartView.legend.enabled = true
-                }
-            }catch (let err){
-                print(err)
-            }
+            completionHandler(data)
         }
-        task.resume()
+        
+        requestTask.resume()
     }
     
 }
@@ -169,21 +125,71 @@ extension UIColor {
 
 extension ViewController : UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.tableData.count
+//        return self.tableData.count
+        return 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard var cell = self.stockCodeTableView.dequeueReusableCell(withIdentifier: "StockCode", for: indexPath) as? StockTableViewCell else{return UITableViewCell()}
-        cell.nameLabel.text = self.tableData[indexPath.item].companyName
-        cell.codeLabel.text = self.tableData[indexPath.item].companyCode
+//        if self.closePriceData.count == 0 {return UITableViewCell()}
+        guard let cell = self.stockCodeTableView.dequeueReusableCell(withIdentifier: "StockCode") as? StockTableViewCell else{return UITableViewCell()}
+//        cell.backgroundColor = UIColor.systemBlue
+        cell.layer.borderColor = UIColor.black.cgColor
+        cell.layer.borderWidth = 0.5
+        cell.layer.cornerRadius = 8
+        cell.clipsToBounds = true
+        cell.backgroundColor = .white
+        cell.nameLabel.text = self.tableData[indexPath.section].companyName
+        cell.codeLabel.text = self.tableData[indexPath.section].companyCode
+        
+//        let cell.chartdataEntry = (0..<10).map{
+//            return ChartDataEntry(x: Double($0), y: Double($0 * 2))
+//        }
+//        cell.chartDataEntry = (0..<10).map{ (i) -> ChartDataEntry in
+//                return ChartDataEntry(x: Double(i), y: Double(i * 2))
+//        }
+//        let dataSet = ChartDataSet(entries: dataEntry)
+//        let data = ChartData(dataSet: dataSet)
+//        cell.closePriceChartView.data = data
+
+        if self.closePriceData.count > indexPath.section{
+            print("reload_data")
+            let currentClosePriceData = self.closePriceData[indexPath.section]
+            cell.chartDataEntry = (0..<currentClosePriceData.count).map{
+                return ChartDataEntry(x: Double($0), y: currentClosePriceData[$0])
+            }
+        }
         return cell
     }
     
+    // MARK: 테이블 섹션 수 정하는 함수 - UITableViewDataSource
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return self.tableData.count
+    }
 }
 
 extension ViewController : UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print(indexPath)
+        let stockChartViewController = StockChartViewController()
+        stockChartViewController.stockCode = StockCode(code: self.tableData[indexPath.section].companyCode, name: self.tableData[indexPath.section].companyCode)
+        self.present(stockChartViewController, animated: false, completion: nil)
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return CGFloat(5)
+    }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let headerView = UIView()
+        headerView.backgroundColor = UIColor.clear
+        return headerView
+    }
+    
+    func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
+        return
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 250
     }
 }
 

@@ -19,8 +19,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
+        window?.backgroundColor = .systemGray
         let firstViewController = ViewController()
-        let tabBarViewController = UITabBarController()
         window?.rootViewController = firstViewController
         window?.makeKeyAndVisible()
         window?.windowScene = windowScene
