@@ -39,7 +39,7 @@ class ViewController: UIViewController {
     var closePriceData : [[Double]] = []{
         didSet {
             DispatchQueue.main.async {
-                print("didSet", self.closePriceData)
+//                print("didSet", self.closePriceData)
                 self.stockCodeTableView.reloadData()
             }
         }
@@ -68,9 +68,9 @@ class ViewController: UIViewController {
     // MARK: setTableViewData 테이블 뷰 테스트 데이터
     func setTableViewData(){
         self.tableData.append(StockCode(code: "005930", name: "삼성전자"))
-//        self.tableData.append(StockCode(code: "035420", name: "NAVER"))
-//        self.tableData.append(StockCode(code: "035720", name: "카카오"))
-//        self.tableData.append(StockCode(code: "005380", name: "현대차"))
+        self.tableData.append(StockCode(code: "035420", name: "NAVER"))
+        self.tableData.append(StockCode(code: "035720", name: "카카오"))
+        self.tableData.append(StockCode(code: "005380", name: "현대차"))
     }
     
     // MARK: 서버에서부터 7일 전의 데이터를 받아오는 함수

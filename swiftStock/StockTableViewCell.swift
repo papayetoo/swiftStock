@@ -32,12 +32,18 @@ class StockTableViewCell: UITableViewCell {
         chartView.backgroundColor = .white
         chartView.translatesAutoresizingMaskIntoConstraints = false
         chartView.xAxis.drawGridLinesEnabled = false
+        chartView.xAxis.drawAxisLineEnabled = false
+        chartView.leftAxis.drawGridLinesEnabled = false
+        chartView.rightAxis.drawAxisLineEnabled = false
+        chartView.leftAxis.drawAxisLineEnabled = false
+        chartView.rightAxis.drawGridLinesEnabled = false
+        chartView.leftAxis.drawLabelsEnabled = false
         return chartView
     }()
     
     var chartDataEntry : [ChartDataEntry]? {
         didSet {
-            print("chartDataEntrySet", self.chartDataEntry)
+//            print("chartDataEntrySet", self.chartDataEntry)
             DispatchQueue.main.async {
                 let dataSet = LineChartDataSet(entries: self.chartDataEntry)
                 let data = LineChartData(dataSet: dataSet)
@@ -65,7 +71,6 @@ class StockTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.setLayout()
-        print(self.closePriceChartView.data)
     }
     
     func setLayout() {
