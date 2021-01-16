@@ -19,11 +19,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
-        window?.backgroundColor = .systemGray
-        let firstViewController = ViewController()
-        window?.rootViewController = firstViewController
-        window?.makeKeyAndVisible()
         window?.windowScene = windowScene
+        window?.backgroundColor = .systemGray
+        let navController = UINavigationController(rootViewController: StockMainViewController())
+        navController.setNavigationBarHidden(true, animated: false)
+        window?.rootViewController = navController
+        window?.makeKeyAndVisible()
+     
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

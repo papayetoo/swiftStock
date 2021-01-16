@@ -40,6 +40,7 @@ class StockChartViewController: UIViewController {
         super.viewDidLoad()
         // MARK: candlestickChartView 테스트 코드
         self.view.addSubview(self.candleStickChartView)
+        self.navigationController?.setNavigationBarHidden(false, animated: false)
         self.candleStickChartView.snp.makeConstraints({
             $0.leading.trailing.equalTo(self.view).offset(0)
             $0.top.equalTo(self.view).offset(0)
