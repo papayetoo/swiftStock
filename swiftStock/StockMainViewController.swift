@@ -22,11 +22,8 @@ class StockMainViewController: UIViewController {
         return tableView
     }()
 
-    
     lazy var tableData: [StockCode] = []
     private let serverURL : URL? = URL(string: "http://15.164.214.228:8000")
-    
-    let session = URLSession.shared
     var closePriceData : [[Double]] = []{
         didSet {
             DispatchQueue.main.async {
@@ -35,28 +32,33 @@ class StockMainViewController: UIViewController {
         }
     }
     
+    private let searchBar : UISearchBar = UISearchBar()
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the
-        self.view.backgroundColor = UIColor.clear
+//        self.view.backgroundColor = UIColor.clear
         self.view.addSubview(self.stockCodeTableView)
         self.stockCodeTableView.snp.makeConstraints({
             $0.leading.trailing.top.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(0)
         })
         // 테스트용 테이블 데이터 설정.
         self.setTableViewData()
-        DispatchQueue.global().async {
-            guard let url = self.serverURL?.appendingPathComponent("main") else {return}
-            let codeList = (0..<self.tableData.count).map{
-                return self.tableData[$0].companyCode
-            }
-            RequestSender.shared.send(url: url, httpMethod: .post, data: ["codes": codeList]){ (data) -> Void in
-                guard let decodedData = try? JSONDecoder().decode([String:[[Double]]].self, from: data), let closePriceData = decodedData["closePrice"] else{
-                    return
-                }
-                self.closePriceData = closePriceData
-            }
-        }
+        // 주식 코드를 먼저 가지고 있을지?
+        // MARK: 서버에서 종가 데이터 받아오는 코드
+//        DispatchQueue.global().async {
+//            guard let url = self.serverURL?.appendingPathComponent("main") else {return}
+//            let codeList = (0..<self.tableData.count).map{
+//                return self.tableData[$0].companyCode
+//            }
+//            RequestSender.shared.send(url: url, httpMethod: .post, data: ["codes": codeList]){ (data) -> Void in
+//                guard let decodedData = try? JSONDecoder().decode([String:[[Double]]].self, from: data), let closePriceData = decodedData["closePrice"] else{
+//                    return
+//                }
+//                self.closePriceData = closePriceData
+//            }
+//        }
     }
     
     // MARK: setTableViewData 테이블 뷰 테스트 데이터
@@ -66,51 +68,7 @@ class StockMainViewController: UIViewController {
         self.tableData.append(StockCode(code: "035420", name: "NAVER"))
         self.tableData.append(StockCode(code: "035720", name: "카카오"))
         self.tableData.append(StockCode(code: "005380", name: "현대차"))
-//        self.tableData.append(StockCode(code: "046310", name: "지니뮤직"))
-//        self.tableData.append(StockCode(code: "AAPL", name: "Apple"))
-//        self.tableData.append(StockCode(code: "TSLA", name: "Tesla"))
-//        self.tableData.append(StockCode(code: "035720", name: "카카오"))
-//        self.tableData.append(StockCode(code: "005380", name: "현대차"))
-//        self.tableData.append(StockCode(code: "046310", name: "지니뮤직"))
     }
-    
-    // MARK: 서버에서부터 7일 전의 데이터를 받아오는 함수
-    func getClosePrice(completionHandler: @escaping (Data) -> Void){
-        
-        let serverURL = URL(string: "http://15.164.214.228:8000")
-        guard let requestURL = serverURL?.appendingPathComponent("main") else {return}
-        var request = URLRequest(url: requestURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: 100)
-        let codeList = (0..<self.tableData.count).map{
-            return self.tableData[$0].companyCode
-        }
-        let jsonData = ["codes": codeList]
-        
-        do{
-            request.httpMethod = "POST"
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.addValue("application/json", forHTTPHeaderField: "Accept")
-            request.addValue("Mobile/iPhone", forHTTPHeaderField: "User-Agent")
-            request.httpBody = try JSONEncoder().encode(codeList)
-        }catch (let err){
-            print(err.localizedDescription)
-        }
-        
-        let requestTask = session.dataTask(with: request) { (data, response, error) in
-            guard error == nil else{
-                print(error?.localizedDescription)
-                return
-            }
-            
-            guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else{
-                return
-            }
-            
-            completionHandler(data)
-        }
-        
-        requestTask.resume()
-    }
-    
 }
 
 extension UIColor {

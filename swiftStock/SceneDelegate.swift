@@ -20,9 +20,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
-        window?.backgroundColor = .systemGray
+        // ToDo: 네비게이션 콘트롤러 색상 문제
         let navController = UINavigationController(rootViewController: StockMainViewController())
-        navController.setNavigationBarHidden(true, animated: false)
         window?.rootViewController = navController
         window?.makeKeyAndVisible()
      
