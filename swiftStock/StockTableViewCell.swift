@@ -90,7 +90,6 @@ class StockTableViewCell: UITableViewCell {
         super.init(coder: coder)
         self.contentView.addSubview(self.nameLabel)
         self.contentView.addSubview(self.codeLabel)
-        
         self.nameLabel.snp.makeConstraints {
             $0.top.equalTo(self.contentView.safeAreaLayoutGuide).offset(10)
             $0.leading.equalTo(self.contentView.safeAreaLayoutGuide).offset(10)

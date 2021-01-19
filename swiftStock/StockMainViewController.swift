@@ -8,6 +8,7 @@
 import UIKit
 import Charts
 import SnapKit
+import CoreData
 
 class StockMainViewController: UIViewController {
     
@@ -33,6 +34,8 @@ class StockMainViewController: UIViewController {
     }
     
     private let searchBar : UISearchBar = UISearchBar()
+    private let appDelegate = UIApplication.shared.delegate as! AppDelegate
+    
     
     
     override func viewDidLoad() {
@@ -45,6 +48,8 @@ class StockMainViewController: UIViewController {
         })
         // 테스트용 테이블 데이터 설정.
         self.setTableViewData()
+        let csvData = self.getCSVData()
+        print(csvData)
         // 주식 코드를 먼저 가지고 있을지?
         // MARK: 서버에서 종가 데이터 받아오는 코드
 //        DispatchQueue.global().async {
@@ -68,6 +73,29 @@ class StockMainViewController: UIViewController {
         self.tableData.append(StockCode(code: "035420", name: "NAVER"))
         self.tableData.append(StockCode(code: "035720", name: "카카오"))
         self.tableData.append(StockCode(code: "005380", name: "현대차"))
+    }
+    // MARK: csv Data 읽기
+    func getCSVData() -> Array<String> {
+        let context = self.appDelegate.persistentContainer.viewContext
+        guard let entity = NSEntityDescription.entity(forEntityName: "StockInfo", in: context) else{return []}
+        do{
+            guard let path = Bundle.main.path(forResource: "codes", ofType: ".csv") else{return []}
+            let contents = try String(contentsOfFile: path)
+            let _ = contents.components(separatedBy: "\n").map{
+                let csvData = $0.components(separatedBy: ",")
+                let stockInfo = NSManagedObject(entity: entity, insertInto: context)
+                if csvData.count > 2{
+                    stockInfo.setValue(csvData[1], forKey: "code")
+                    stockInfo.setValue(csvData[2], forKey: "name")
+                    print(csvData)
+                }
+            }
+            try context.save()
+            print("context end")
+        }catch{
+            return []
+        }
+        return []
     }
 }
 
