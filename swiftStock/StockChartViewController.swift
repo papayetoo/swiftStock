@@ -13,7 +13,7 @@ class StockChartViewController: UIViewController {
     var stockCode : StockCode?
     
     let session = URLSession.shared
-    private let serverURL = URL(string: "http://15.164.214.228:8000")
+    private let serverURL = URL(string: "http://3.36.72.105:8000")
     
     // MARK: CandleStickChartView 그리기 위함.
     private lazy var candleStickChartView : CandleStickChartView = {

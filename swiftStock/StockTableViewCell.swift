@@ -119,16 +119,16 @@ class StockTableViewCell: UITableViewCell {
         self.contentView.layer.masksToBounds = false
         
         self.nameLabel.snp.makeConstraints {
-            $0.top.equalTo(self.contentView.safeAreaLayoutGuide).offset(10)
-            $0.leading.equalTo(self.contentView.safeAreaLayoutGuide).offset(10)
+            $0.top.equalTo(self.contentView).offset(10)
+            $0.leading.equalTo(self.contentView).offset(10)
 //            $0.top.equalTo(self.containerView.safeAreaLayoutGuide).offset(10)
 //            $0.leading.equalTo(self.containerView.safeAreaLayoutGuide).offset(10)
         }
         
         self.closePriceChartView.snp.makeConstraints{
-            $0.top.bottom.equalTo(self.contentView.safeAreaLayoutGuide)
-            $0.leading.equalTo(self.contentView.safeAreaLayoutGuide).offset(100)
-            $0.trailing.equalTo(self.contentView.safeAreaLayoutGuide).offset(-40)
+            $0.top.bottom.equalTo(self.contentView)
+            $0.leading.equalTo(self.contentView).offset(100)
+            $0.trailing.equalTo(self.contentView).offset(-40)
         }
     }
     

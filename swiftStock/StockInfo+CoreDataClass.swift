@@ -11,5 +11,5 @@ import CoreData
 
 @objc(StockInfo)
 public class StockInfo: NSManagedObject {
-    
+
 }

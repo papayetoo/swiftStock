@@ -24,7 +24,7 @@ class StockMainViewController: UIViewController {
     }()
 
     lazy var tableData: [StockCode] = []
-    private let serverURL : URL? = URL(string: "http://15.164.214.228:8000")
+    private let serverURL : URL? = URL(string: "http://3.36.72.105:8000")
     var closePriceData : [[Double]] = []{
         didSet {
             DispatchQueue.main.async {
@@ -48,8 +48,8 @@ class StockMainViewController: UIViewController {
         })
         // 테스트용 테이블 데이터 설정.
         self.setTableViewData()
-        let csvData = self.getCSVData()
-        print(csvData)
+//        let csvData = self.getCSVData()
+        self.fetchStockInfo()
         // 주식 코드를 먼저 가지고 있을지?
         // MARK: 서버에서 종가 데이터 받아오는 코드
 //        DispatchQueue.global().async {
@@ -77,12 +77,14 @@ class StockMainViewController: UIViewController {
     // MARK: csv Data 읽기
     func getCSVData() -> Array<String> {
         let context = self.appDelegate.persistentContainer.viewContext
+        // MARK: entity를 가져온다.
         guard let entity = NSEntityDescription.entity(forEntityName: "StockInfo", in: context) else{return []}
         do{
             guard let path = Bundle.main.path(forResource: "codes", ofType: ".csv") else{return []}
             let contents = try String(contentsOfFile: path)
             let _ = contents.components(separatedBy: "\n").map{
                 let csvData = $0.components(separatedBy: ",")
+                // MARK: NSManagedObject를 만든다.
                 let stockInfo = NSManagedObject(entity: entity, insertInto: context)
                 if csvData.count > 2{
                     stockInfo.setValue(csvData[1], forKey: "code")
@@ -93,9 +95,27 @@ class StockMainViewController: UIViewController {
             try context.save()
             print("context end")
         }catch{
+            print(error.localizedDescription)
             return []
         }
         return []
+    }
+    
+    func fetchStockInfo(){
+        let context = self.appDelegate.persistentContainer.viewContext
+        
+        do {
+//            let data = try context.fetch(StockInfo.fetchRequest()) as! [StockInfo]
+//            data.forEach{
+//                print($0.name)
+//            }
+            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "StockInfo")
+            request.predicate = NSPredicate(format: "code = %@", "005930")
+            let data = try context.fetch(request)
+            print(data)
+        }catch{
+            print(error.localizedDescription)
+        }
     }
 }
 
