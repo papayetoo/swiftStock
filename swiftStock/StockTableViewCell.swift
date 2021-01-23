@@ -27,12 +27,46 @@ class StockTableViewCell: UITableViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    // MARK: 마지막날 가격 및 전날 대비 증가율%
+    var currentPrice : Double? {
+        didSet{
+            guard let price = self.currentPrice else{return}
+            self.currentPriceLabel.text = String(format: "%d", Int(price))
+        }
+    }
+    var currentPriceLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont(name: "Helvetica Neue", size: 20)
+        label.textColor = .black
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    var percent: Double? {
+        didSet{
+            guard let percent = self.percent else{return}
+            self.percentLabel.text = String(format: "(%.2f%%)", percent)
+        }
+    }
+    
+    var percentLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont(name: "Helvetica Neue", size: 20)
+        label.textColor = .black
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     // MARK: 종가 LineChartView
     var closePriceChartView : LineChartView = {
         let chartView = LineChartView()
         chartView.backgroundColor = .white
         chartView.translatesAutoresizingMaskIntoConstraints = false
         chartView.isUserInteractionEnabled = false
+        chartView.minOffset = 0
+        chartView.xAxis.enabled = false
+        chartView.leftAxis.enabled = false
+        chartView.rightAxis.enabled = false
         chartView.xAxis.drawGridLinesEnabled = false
         chartView.xAxis.drawAxisLineEnabled = false
         chartView.leftAxis.drawGridLinesEnabled = false
@@ -45,16 +79,16 @@ class StockTableViewCell: UITableViewCell {
         return chartView
     }()
     
-    let containerView : UIView = {
+    var containerView : UIView = {
         let view = UIView()
+        view.backgroundColor = .white
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.layer.borderWidth = 0.4
         view.layer.cornerRadius = 10
-        view.layer.shadowOpacity = 1
-        view.layer.shadowRadius = 2
-        view.layer.shadowColor = UIColor(named: "Orange")?.cgColor
-        view.layer.shadowOffset = CGSize(width: 3, height: 3)
-        view.backgroundColor = UIColor(named: "Red")
+        view.layer.masksToBounds = true
         return view
     }()
+    
     // MARK: 전날과 비교 상승/하락 판단
     var isIncreasing: Bool = false
     // MARK: LineChartView 그리는 데 필요한 데이터
@@ -63,14 +97,15 @@ class StockTableViewCell: UITableViewCell {
 //            print("chartDataEntrySet", self.chartDataEntry)
             DispatchQueue.main.async {
                 let dataSet = LineChartDataSet(entries: self.chartDataEntry)
+                // 원표시 설정
                 dataSet.drawCirclesEnabled = false
+                // 원표시에 구멍 그릴지 말지 설정.
                 dataSet.drawCircleHoleEnabled = false
                 // 영역 아래 그라디언트 세팅.
                 dataSet.drawFilledEnabled = true
                 // 둥근 선 그리기 위한 옵션
                 dataSet.mode = .cubicBezier
                 // LineChartView 줄 색 선택
-                
                 dataSet.setColor(self.isIncreasing ? UIColor(red: 255, green: 0, blue: 0) : UIColor(red: 0, green: 255, blue: 0))
                 let colorTop = self.isIncreasing ? UIColor.systemRed.cgColor : UIColor.systemGreen.cgColor
                 let colorBottom = UIColor.white.cgColor
@@ -88,17 +123,8 @@ class StockTableViewCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        self.contentView.addSubview(self.nameLabel)
-        self.contentView.addSubview(self.codeLabel)
-        self.nameLabel.snp.makeConstraints {
-            $0.top.equalTo(self.contentView.safeAreaLayoutGuide).offset(10)
-            $0.leading.equalTo(self.contentView.safeAreaLayoutGuide).offset(10)
-        }
-        
-        self.codeLabel.snp.makeConstraints {
-            $0.top.equalTo(self.contentView.safeAreaLayoutGuide).offset(10)
-            $0.trailing.equalTo(self.contentView.safeAreaLayoutGuide).offset(-10)
-        }
+//        self.contentView.addSubview(self.nameLabel)
+//        self.contentView.addSubview(self.codeLabel)
     }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -106,35 +132,49 @@ class StockTableViewCell: UITableViewCell {
         self.setLayout()
     }
     
+    // MARK: setLayOut -> 서브뷰 추가 및 레이아웃 설정
     func setLayout() {
-        
-        self.contentView.addSubview(nameLabel)
-        self.contentView.addSubview(closePriceChartView)
-        self.contentView.layer.borderWidth = 5
-        self.contentView.layer.shadowOpacity = 0.7
-        self.contentView.layer.shadowColor = UIColor(named: "Orange")?.cgColor
-        self.contentView.layer.shadowRadius = 12
-        self.contentView.layer.cornerRadius = 30
-        self.contentView.layer.shadowOffset = CGSize(width: 10, height: 10)
-        self.contentView.layer.masksToBounds = false
-        
-        self.nameLabel.snp.makeConstraints {
-            $0.top.equalTo(self.contentView).offset(10)
+        self.contentView.addSubview(self.containerView)
+        self.containerView.addSubview(self.nameLabel)
+        self.containerView.addSubview(self.closePriceChartView)
+        self.containerView.addSubview(self.currentPriceLabel)
+        self.containerView.addSubview(self.percentLabel)
+        // containerView Contraints 설정
+        self.containerView.snp.makeConstraints{
             $0.leading.equalTo(self.contentView).offset(10)
-//            $0.top.equalTo(self.containerView.safeAreaLayoutGuide).offset(10)
-//            $0.leading.equalTo(self.containerView.safeAreaLayoutGuide).offset(10)
-        }
-        
-        self.closePriceChartView.snp.makeConstraints{
+            $0.trailing.equalTo(self.contentView).offset(-10)
             $0.top.bottom.equalTo(self.contentView)
-            $0.leading.equalTo(self.contentView).offset(100)
-            $0.trailing.equalTo(self.contentView).offset(-40)
+        }
+        // nameLabel Contraints 설정
+        self.nameLabel.snp.makeConstraints{
+            $0.leading.equalTo(self.containerView).offset(10)
+            $0.top.equalTo(self.containerView).offset(10)
+        }
+        // MARK: currentPriceLabel 설정
+        self.currentPriceLabel.snp.makeConstraints{
+            $0.leading.equalTo(self.containerView).offset(10)
+            $0.top.equalTo(self.nameLabel.snp.bottom).offset(10)
+        }
+        // MARK: percentLabel 설정
+        self.percentLabel.snp.makeConstraints{
+            $0.leading.equalTo(self.containerView).offset(10)
+            $0.top.equalTo(self.currentPriceLabel.snp.bottom).offset(10)
+        }
+        // closePriceChartView Contraints 설정.
+        self.closePriceChartView.snp.makeConstraints{
+            $0.top.bottom.trailing.equalTo(self.containerView)
+            $0.leading.equalTo(self.containerView).offset(100)
         }
     }
     
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.contentView.frame = self.contentView.frame.inset(by: UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0))
     }
     
     

@@ -13,7 +13,7 @@ class StockChartViewController: UIViewController {
     var stockCode : StockCode?
     
     let session = URLSession.shared
-    private let serverURL = URL(string: "http://3.36.72.105:8000")
+    private let serverURL = URL(string: "http://3.34.96.176:8000")
     
     // MARK: CandleStickChartView 그리기 위함.
     private lazy var candleStickChartView : CandleStickChartView = {
@@ -30,8 +30,7 @@ class StockChartViewController: UIViewController {
         if let font = UIFont(name: "Helevetica-Nueue", size: 10){
             chartView.legend.font = font
         }
-        chartView.backgroundColor = .black
-         
+        chartView.backgroundColor = .white
         chartView.drawGridBackgroundEnabled = false
         return chartView
     }()
@@ -40,7 +39,6 @@ class StockChartViewController: UIViewController {
         super.viewDidLoad()
         // MARK: candlestickChartView 테스트 코드
         self.view.addSubview(self.candleStickChartView)
-        self.navigationController?.setNavigationBarHidden(false, animated: false)
         self.candleStickChartView.snp.makeConstraints({
             $0.leading.trailing.equalTo(self.view).offset(0)
             $0.top.equalTo(self.view).offset(0)

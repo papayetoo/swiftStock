@@ -15,16 +15,19 @@ class StockMainViewController: UIViewController {
     // MARK: 종목코드를 표현하기 위한 TableView
     lazy var stockCodeTableView : UITableView = {
         let tableView = UITableView()
+//        tableView.contentInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
         tableView.dataSource = self
         tableView.delegate = self
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = UIColor.white
+        // tableView 구분선 스타일 결정
+        tableView.separatorStyle = .none
         tableView.register(StockTableViewCell.self, forCellReuseIdentifier: "StockCode")
         return tableView
     }()
 
     lazy var tableData: [StockCode] = []
-    private let serverURL : URL? = URL(string: "http://3.36.72.105:8000")
+    private let serverURL : URL? = URL(string: "http:/3.34.96.176:8000")
     var closePriceData : [[Double]] = []{
         didSet {
             DispatchQueue.main.async {
@@ -41,29 +44,17 @@ class StockMainViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the
-//        self.view.backgroundColor = UIColor.clear
+        print(self.navigationController?.navigationBar.backgroundColor)
+        self.view.backgroundColor = .systemBackground
         self.view.addSubview(self.stockCodeTableView)
         self.stockCodeTableView.snp.makeConstraints({
-            $0.leading.trailing.top.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(0)
+            $0.leading.trailing.top.bottom.equalTo(self.view).offset(0)
+            $0.width.equalTo(self.view.frame.width)
         })
         // 테스트용 테이블 데이터 설정.
         self.setTableViewData()
+        self.fetchData()
 //        let csvData = self.getCSVData()
-        self.fetchStockInfo()
-        // 주식 코드를 먼저 가지고 있을지?
-        // MARK: 서버에서 종가 데이터 받아오는 코드
-//        DispatchQueue.global().async {
-//            guard let url = self.serverURL?.appendingPathComponent("main") else {return}
-//            let codeList = (0..<self.tableData.count).map{
-//                return self.tableData[$0].companyCode
-//            }
-//            RequestSender.shared.send(url: url, httpMethod: .post, data: ["codes": codeList]){ (data) -> Void in
-//                guard let decodedData = try? JSONDecoder().decode([String:[[Double]]].self, from: data), let closePriceData = decodedData["closePrice"] else{
-//                    return
-//                }
-//                self.closePriceData = closePriceData
-//            }
-//        }
     }
     
     // MARK: setTableViewData 테이블 뷰 테스트 데이터
@@ -73,6 +64,22 @@ class StockMainViewController: UIViewController {
         self.tableData.append(StockCode(code: "035420", name: "NAVER"))
         self.tableData.append(StockCode(code: "035720", name: "카카오"))
         self.tableData.append(StockCode(code: "005380", name: "현대차"))
+    }
+    
+    // MARK: 서버에서 종가 데이터 받아오는 코드
+    func fetchData(){
+        // 데이터는 데몬 쓰레드에서 데이터 가져옴.
+        DispatchQueue.global().async {
+            // server의 URL이 존재하는 상태라면...
+            guard let url = self.serverURL?.appendingPathComponent("main") else {return}
+            let codeList = self.tableData.map{return $0.companyCode}
+            RequestSender.shared.send(url: url, httpMethod: .post, data: ["codes": codeList]){ (data) -> Void in
+                guard let decodedData = try? JSONDecoder().decode([String:[[Double]]].self, from: data), let closePriceData = decodedData["closePrice"] else{
+                    return
+                }
+                self.closePriceData = closePriceData
+            }
+        }
     }
     // MARK: csv Data 읽기
     func getCSVData() -> Array<String> {
@@ -132,29 +139,24 @@ extension UIColor {
 
 extension StockMainViewController : UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        return self.tableData.count
-        return 1
+        return self.tableData.count
+//        return 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        if self.closePriceData.count == 0 {return UITableViewCell()}
         guard let cell = self.stockCodeTableView.dequeueReusableCell(withIdentifier: "StockCode") as? StockTableViewCell else{return UITableViewCell()}
-//        cell.backgroundColor = UIColor.systemBlue
-//        cell.layer.borderColor = UIColor.black.cgColor
-//        cell.layer.borderWidth = 0.2
-//        cell.layer.cornerRadius = 20
-//        cell.clipsToBounds = true
         cell.backgroundColor = .white
-        cell.nameLabel.text = self.tableData[indexPath.section].companyName
-        cell.codeLabel.text = self.tableData[indexPath.section].companyCode
-                
-        if self.closePriceData.count > indexPath.section{
-            let currentClosePriceData = self.closePriceData[indexPath.section]
+        cell.nameLabel.text = self.tableData[indexPath.row].companyName
+        cell.codeLabel.text = self.tableData[indexPath.row].companyCode
+        if self.closePriceData.count > indexPath.row{
+            let currentClosePriceData = self.closePriceData[indexPath.row]
             cell.chartDataEntry = (0..<currentClosePriceData.count).map{
                 return ChartDataEntry(x: Double($0), y: currentClosePriceData[$0])
             }
             guard let lastData = currentClosePriceData.last else{return cell}
+            cell.currentPrice  = lastData
             let beforeLastData = currentClosePriceData[currentClosePriceData.endIndex - 2]
+            cell.percent = (lastData - beforeLastData) / beforeLastData
             if lastData >= beforeLastData {
                 cell.isIncreasing = true
             }else{
@@ -166,36 +168,39 @@ extension StockMainViewController : UITableViewDataSource {
     
     // MARK: 테이블 섹션 수 정하는 함수 - UITableViewDataSource
     // section 과 indexPath 구분할 것
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return self.tableData.count
-    }
+//    func numberOfSections(in tableView: UITableView) -> Int {
+//        return self.tableData.count
+//    }
 }
 
 extension StockMainViewController : UITableViewDelegate {
+    // MARK: cell 선택시 액션
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let stockChartViewController = StockChartViewController()
-        stockChartViewController.stockCode = StockCode(code: self.tableData[indexPath.section].companyCode, name: self.tableData[indexPath.section].companyCode)
+//        stockChartViewController.stockCode = StockCode(code: self.tableData[indexPath.section].companyCode, name: self.tableData[indexPath.section].companyCode)
+        stockChartViewController.stockCode = StockCode(code: self.tableData[indexPath.row].companyCode, name: self.tableData[indexPath.section].companyCode)
         // present를 push로 변경할 것.
-        self.present(stockChartViewController, animated: false)
+//        self.present(stockChartViewController, animated: false)
+        self.navigationController?.pushViewController(stockChartViewController, animated: false)
     }
-    
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return CGFloat(5)
-    }
-    
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let headerView = UIView()
-        headerView.backgroundColor = UIColor.clear
-        return headerView
-    }
-    
+    // MARK: cell 선택취소시 함수.
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         return
     }
     
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 100
+    // MARK: 섹션 헤더 높이 설정.
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return CGFloat(10)
     }
+//    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+//        let headerView = UIView()
+//        headerView.backgroundColor = UIColor.clear
+//        return headerView
+//    }
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 120
+    }
+    
 }
 
 extension StockMainViewController : ChartViewDelegate {

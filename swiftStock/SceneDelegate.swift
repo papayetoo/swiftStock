@@ -21,10 +21,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
         // ToDo: 네비게이션 콘트롤러 색상 문제
-        let navController = UINavigationController(rootViewController: StockMainViewController())
+        let stockMainViewController = StockMainViewController()
+        let navController = UINavigationController(rootViewController: stockMainViewController)
+        navController.navigationBar.isTranslucent = true
+//        navController.navigationBar.backgroundColor = .systemGray
+        navController.navigationBar.barTintColor = .systemGray3
         window?.rootViewController = navController
         window?.makeKeyAndVisible()
-     
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
