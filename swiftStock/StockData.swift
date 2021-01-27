@@ -12,5 +12,5 @@ struct StockData: Codable {
     var closePrice : [Double]
     var highPrice : [Double]
     var lowPrice : [Double]
-    var days: Int
+    var volume: [Int]
 }

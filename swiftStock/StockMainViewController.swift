@@ -27,7 +27,7 @@ class StockMainViewController: UIViewController {
     }()
 
     lazy var tableData: [StockCode] = []
-    private let serverURL : URL? = URL(string: "http:/3.34.96.176:8000")
+    private let serverURL : URL? = URL(string: "http://3.34.96.176:8000")
     var closePriceData : [[Double]] = []{
         didSet {
             DispatchQueue.main.async {
@@ -44,8 +44,9 @@ class StockMainViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the
-        print(self.navigationController?.navigationBar.backgroundColor)
+        print("START")
         self.view.backgroundColor = .systemBackground
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(self.addButtonTouchUp(_:)))
         self.view.addSubview(self.stockCodeTableView)
         self.stockCodeTableView.snp.makeConstraints({
             $0.leading.trailing.top.bottom.equalTo(self.view).offset(0)
@@ -53,8 +54,9 @@ class StockMainViewController: UIViewController {
         })
         // 테스트용 테이블 데이터 설정.
         self.setTableViewData()
-        self.fetchData()
-//        let csvData = self.getCSVData()
+        // 서버에서 데이터 수신
+        // self.fetchData()
+        self.fetchStockInfo()
     }
     
     // MARK: setTableViewData 테이블 뷰 테스트 데이터
@@ -118,11 +120,17 @@ class StockMainViewController: UIViewController {
 //            }
             let request = NSFetchRequest<NSFetchRequestResult>(entityName: "StockInfo")
             request.predicate = NSPredicate(format: "code = %@", "005930")
-            let data = try context.fetch(request)
-            print(data)
+            guard let data = try context.fetch(request) as? [StockInfo] else{return}
+            print(data[0].name)
         }catch{
             print(error.localizedDescription)
         }
+    }
+    
+    @objc func addButtonTouchUp(_ sender: Any){
+        print("touch UP inside")
+        let addStockViewController = AddStockViewController()
+        self.navigationController?.pushViewController(addStockViewController, animated: false)
     }
 }
 
@@ -177,10 +185,10 @@ extension StockMainViewController : UITableViewDelegate {
     // MARK: cell 선택시 액션
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let stockChartViewController = StockChartViewController()
-//        stockChartViewController.stockCode = StockCode(code: self.tableData[indexPath.section].companyCode, name: self.tableData[indexPath.section].companyCode)
         stockChartViewController.stockCode = StockCode(code: self.tableData[indexPath.row].companyCode, name: self.tableData[indexPath.section].companyCode)
-        // present를 push로 변경할 것.
-//        self.present(stockChartViewController, animated: false)
+        stockChartViewController.companyName = self.tableData[indexPath.row].companyName
+        stockChartViewController.stockCode = self.tableData[indexPath.row]
+        print(self.tableData)
         self.navigationController?.pushViewController(stockChartViewController, animated: false)
     }
     // MARK: cell 선택취소시 함수.

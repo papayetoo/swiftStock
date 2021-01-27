@@ -12,7 +12,7 @@ class PersistenceManager{
     static var shared : PersistenceManager = PersistenceManager()
     
     var persistanceContainer : NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "StockInfo")
+        let container = NSPersistentContainer(name: "Data")
         container.loadPersistentStores{ (storeDescription, error) in
             if let error = error as NSError? {
                 fatalError("Unresolved error \(error), \(error.userInfo)")

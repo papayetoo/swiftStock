@@ -25,7 +25,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let navController = UINavigationController(rootViewController: stockMainViewController)
         navController.navigationBar.isTranslucent = true
 //        navController.navigationBar.backgroundColor = .systemGray
-        navController.navigationBar.barTintColor = .systemGray3
+        navController.navigationBar.barTintColor = .systemBackground
+        
         window?.rootViewController = navController
         window?.makeKeyAndVisible()
     }

@@ -11,14 +11,16 @@ import SnapKit
 
 
 class StockTableViewCell: UITableViewCell {
+    private let serverURL = URL(string: "http://3.34.96.176:8000")
     
     // MARK: 코드명칭 UILabel
     var codeLabel : UILabel = {
         let label = UILabel()
-        
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    // MARK: 현재 주식 데이터
+    var currentStockData : StockData?
     // MARK: 회사명칭 UILabel
     var nameLabel : UILabel = {
         let label = UILabel()
@@ -131,6 +133,8 @@ class StockTableViewCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.setLayout()
     }
+    // MARK: fetchData from Server
+    
     
     // MARK: setLayOut -> 서브뷰 추가 및 레이아웃 설정
     func setLayout() {
@@ -160,7 +164,7 @@ class StockTableViewCell: UITableViewCell {
             $0.leading.equalTo(self.containerView).offset(10)
             $0.top.equalTo(self.currentPriceLabel.snp.bottom).offset(10)
         }
-        // closePriceChartView Contraints 설정.
+        // MARK: closePriceChartView Contraints 설정.
         self.closePriceChartView.snp.makeConstraints{
             $0.top.bottom.trailing.equalTo(self.containerView)
             $0.leading.equalTo(self.containerView).offset(100)
