@@ -41,67 +41,32 @@ class StockChartViewController: UIViewController {
         let stackView = UIStackView()
         stackView.backgroundColor = .white
         stackView.axis = .horizontal
-        stackView.alignment = .fill
+        stackView.alignment = .center
+        stackView.distribution = .equalCentering
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
-    
-    private let fiveDaysButton : UIButton = {
-        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
-        button.setTitle("5D", for: .normal)
-        button.setTitleColor(.systemRed, for: .normal)
-        return button
+    let cellIdentifier = "extraInfo"
+    // MARK: extraInfoTableView
+    private let extraInfoTableView : UITableView = {
+        let tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        return tableView
     }()
     
-    private let twoWeeksButton : UIButton = {
-        let button = UIButton(type: .custom)
-        button.setTitle("2W", for: .normal)
-        button.titleLabel?.text = "2W"
-        button.titleLabel?.textColor = .red
-        button.titleLabel?.shadowColor = .systemGray
-        button.titleLabel?.highlightedTextColor = .systemBlue
-        return button
-    }()
+    private let extraInfoElements : [String] = ["전일 종가", "시가", "고가", "저가", "종가", "거래량"]
     
-    private let oneMonthButton : UIButton = {
-        let button = UIButton(type: .custom)
-        button.setTitle("1M", for: .normal)
-        button.titleLabel?.text = "1M"
-        button.titleLabel?.textColor = .red
-        button.titleLabel?.shadowColor = .systemGray
-        button.titleLabel?.highlightedTextColor = .systemBlue
-        return button
+    private let dateRangeButtons : [UIButton] = {
+        let dateRange : [String] = ["5D", "2W", "1M", "3M", "6M", "1Y"]
+        let buttons : [UIButton] =  (0..<dateRange.count).map{
+            let button =  UIButton(frame: CGRect(x: 0, y: 0, width: 20, height: 30))
+            button.setTitle(dateRange[$0], for: .normal)
+            button.setTitleColor(.systemGray2, for: .normal)
+            return button
+        }
+        return buttons
     }()
-    
-    private let threeMonthsButton : UIButton = {
-        let button = UIButton(type: .custom)
-        button.setTitle("3M", for: .normal)
-        button.titleLabel?.text = "3M"
-        button.titleLabel?.textColor = .red
-        button.titleLabel?.shadowColor = .systemGray
-        button.titleLabel?.highlightedTextColor = .systemBlue
-        return button
-    }()
-    
-    private let sixMonthsButton : UIButton = {
-        let button = UIButton(type: .custom)
-        button.setTitle("6M", for: .normal)
-        button.titleLabel?.text = "6M"
-        button.titleLabel?.textColor = .red
-        button.titleLabel?.shadowColor = .systemGray
-        button.titleLabel?.highlightedTextColor = .systemBlue
-        return button
-    }()
-    
-    private let oneYearButton: UIButton = {
-        let button = UIButton(type: .custom)
-        button.setTitle("1Y", for: .normal)
-        button.titleLabel?.text = "1Y"
-        button.titleLabel?.textColor = .red
-        button.titleLabel?.shadowColor = .systemGray
-        button.titleLabel?.highlightedTextColor = .systemBlue
-        return button
-    }()
+
     
     // MARK: 회사명 표시 라벨
     private let companyNameLabel: UILabel = {
@@ -136,6 +101,12 @@ class StockChartViewController: UIViewController {
         button.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         return button
     }()
+    
+    private var term : Int = 5 {
+        didSet{
+            self.setChart()
+        }
+    }
     
     // MARK: 현재 시세 표시 라벨
     private let currentPriceLabel: UILabel = {
@@ -250,6 +221,7 @@ class StockChartViewController: UIViewController {
         self.setInfoView()
         self.setChartView()
         self.setButtonContainerView()
+        self.setExtraInfoTableView()
     }
     
     func setStackView(){
@@ -314,17 +286,32 @@ class StockChartViewController: UIViewController {
     // MARK: setButtonContainerView
     func setButtonContainerView(){
         self.stackView.addSubview(self.buttonContainerView)
+        self.stackView.spacing = 5
         self.buttonContainerView.snp.makeConstraints{
-            $0.leading.trailing.equalTo(self.stackView)
+            $0.leading.equalTo(self.stackView).offset(20)
+            $0.trailing.equalTo(self.stackView).offset(-20)
             $0.top.equalTo(self.chartContainerView.snp.bottom)
-            $0.height.equalTo(170)
+            $0.height.equalTo(70)
         }
-        self.buttonContainerView.addSubview(self.fiveDaysButton)
-        self.buttonContainerView.addSubview(self.twoWeeksButton)
-        self.buttonContainerView.addSubview(self.oneMonthButton)
-        self.buttonContainerView.addSubview(self.threeMonthsButton)
-        self.buttonContainerView.addSubview(self.sixMonthsButton)
-        self.buttonContainerView.addSubview(self.oneYearButton)
+        
+        let _ = self.dateRangeButtons.map{
+            self.buttonContainerView.addArrangedSubview($0)
+            $0.addTarget(self, action: #selector(self.touchUpRangeButton(_:)), for: .touchUpInside)
+        }
+        
+        self.dateRangeButtons[0].isSelected = true
+        self.dateRangeButtons[0].setTitleColor(.systemBlue, for: .normal)
+
+    }
+    // MARK: setExtraInfoView()
+    func setExtraInfoTableView(){
+        self.stackView.addSubview(self.extraInfoTableView)
+        self.extraInfoTableView.register(ExtraInfoTableViewCell.self, forCellReuseIdentifier: self.cellIdentifier)
+        self.extraInfoTableView.dataSource = self
+        self.extraInfoTableView.snp.makeConstraints{
+            $0.leading.trailing.bottom.equalTo(self.stackView)
+            $0.top.equalTo(self.buttonContainerView.snp.bottom)
+        }
     }
     
     
@@ -338,6 +325,26 @@ class StockChartViewController: UIViewController {
         if self.starButton.currentImage == UIImage(named: "bstar_filled"){
             self.starButton.setImage(UIImage(named: "bstar_empty"), for: .normal)
             return
+        }
+        
+    }
+    
+    // MARK: 기간 버튼 터치시 컬러 변경
+    @objc func touchUpRangeButton(_ button: UIButton){
+        if button.isSelected {return}
+        let dateRangeValue : [String:Int] = ["5D":5, "2W":14, "1M":30, "3M":90, "6M":180, "1Y":365]
+        
+        let _ = self.dateRangeButtons.map{
+            if $0 == button {
+                guard let title = $0.title(for: .normal), let dateRange = dateRangeValue[title] else{return}
+                self.term = dateRange
+                $0.isSelected = true
+                $0.setTitleColor(.systemBlue, for: .normal)
+            }
+            if $0 != button && $0.isSelected{
+                $0.isSelected = false
+                $0.setTitleColor(.systemGray2, for: .normal)
+            }
         }
         
     }
@@ -368,7 +375,7 @@ class StockChartViewController: UIViewController {
             // complete Handler로 response을 정상적으로 받았다면
             // closePrice와 volume 데이터를 이용해 그래프 그림.
             guard let url = self.serverURL?.appendingPathComponent("getDf"), let code = self.stockCode?.companyCode else {return}
-            RequestSender.shared.send(url: url, httpMethod: .post, data: FlaskRequest(code: code)) { (data) -> Void in
+            RequestSender.shared.send(url: url, httpMethod: .post, data: FlaskRequest(code: code, term: self.term)) { (data) -> Void in
                 guard let stockData = try? JSONDecoder().decode(StockData.self, from: data) else {return}
                 let closePrice = stockData.closePrice
                 let volume = stockData.volume
@@ -382,5 +389,17 @@ class StockChartViewController: UIViewController {
                 }
             }
         }
+    }
+}
+
+extension StockChartViewController : UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return self.extraInfoElements.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = self.extraInfoTableView.dequeueReusableCell(withIdentifier: self.cellIdentifier, for: indexPath) as? ExtraInfoTableViewCell else{return UITableViewCell()}
+        cell.element = self.extraInfoElements[indexPath.row]
+        return cell
     }
 }
