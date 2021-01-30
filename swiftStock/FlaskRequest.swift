@@ -7,11 +7,10 @@
 
 import Foundation
 
-struct FlaskRequest: Encodable{
+struct FlaskRequest: Encodable {
     let code: String
     let term: Int
-    
-    enum CodingKeys: String, CodingKey{
+    enum CodingKeys: String, CodingKey {
         case code
         case term
     }

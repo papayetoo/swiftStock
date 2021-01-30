@@ -7,6 +7,6 @@
 
 import Foundation
 
-struct SimpleData : Codable{
+struct SimpleData: Codable {
     let closePrice: [[Double]]
 }

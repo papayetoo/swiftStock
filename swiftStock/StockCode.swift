@@ -7,10 +7,10 @@
 
 import Foundation
 
-class StockCode{
-    var companyCode : String
+class StockCode {
+    var companyCode: String
     var companyName: String
-    
+
     init(code: String, name: String) {
         self.companyCode = code
         self.companyName = name

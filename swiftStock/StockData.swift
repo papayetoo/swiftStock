@@ -8,9 +8,9 @@
 import Foundation
 
 struct StockData: Codable {
-    var openPrice : [Double]
-    var closePrice : [Double]
-    var highPrice : [Double]
-    var lowPrice : [Double]
+    var openPrice: [Double]
+    var closePrice: [Double]
+    var highPrice: [Double]
+    var lowPrice: [Double]
     var volume: [Int]
 }

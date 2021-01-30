@@ -1,0 +1,4 @@
+excluded:
+    - Pods
+    - swiftStock/AppDelegate.swift
+    - swfitStock/SceneDelegate.swift

@@ -9,29 +9,29 @@ import UIKit
 import SnapKit
 
 class AddStockViewCell: UITableViewCell {
-    
-    private let nameLabel : UILabel = {
+
+    private let nameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
+
     var name: String? {
-        didSet{
+        didSet {
             guard let name = self.name else {return}
             self.nameLabel.text = name
         }
     }
-    
-    private let codeLabel : UILabel = {
+
+    private let codeLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
+
     var code: String? {
-        didSet{
-            guard let code = self.code else{return}
+        didSet {
+            guard let code = self.code else {return}
             self.codeLabel.text = code
         }
     }
@@ -40,11 +40,11 @@ class AddStockViewCell: UITableViewCell {
         super.awakeFromNib()
         // Initialization code
     }
-    
+
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
-    
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.setLayout()
@@ -54,16 +54,16 @@ class AddStockViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
         // Configure the view for the selected state
     }
-    
-    func setLayout(){
+
+    func setLayout() {
         self.contentView.addSubview(self.nameLabel)
-        self.nameLabel.snp.makeConstraints{
+        self.nameLabel.snp.makeConstraints {
             $0.centerY.equalTo(self.contentView)
             $0.leading.equalTo(self.contentView).offset(10)
             $0.width.equalTo(150)
         }
         self.contentView.addSubview(self.codeLabel)
-        self.codeLabel.snp.makeConstraints{
+        self.codeLabel.snp.makeConstraints {
             $0.centerY.equalTo(self.contentView)
             $0.trailing.equalTo(self.contentView).offset(-10)
             $0.width.equalTo(150)

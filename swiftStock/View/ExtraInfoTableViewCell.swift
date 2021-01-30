@@ -9,35 +9,33 @@ import UIKit
 import SnapKit
 
 class ExtraInfoTableViewCell: UITableViewCell {
-    
-    var element : String? {
-        didSet{
+    var element: String? {
+        didSet {
             self.elementLabel.text = element
         }
     }
-    
-    private let elementLabel : UILabel = {
+
+    private let elementLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
-    var value : String? {
-        didSet{
+
+    var value: String? {
+        didSet {
             self.valueLabel.text = value
         }
     }
-    
-    private let valueLabel : UILabel = {
+
+    private let valueLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
+
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
-    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.setLayout()
@@ -53,19 +51,17 @@ class ExtraInfoTableViewCell: UITableViewCell {
 
         // Configure the view for the selected state
     }
-    
-    func setLayout(){
+
+    func setLayout() {
         self.contentView.addSubview(self.elementLabel)
         self.contentView.addSubview(self.valueLabel)
-        self.elementLabel.snp.makeConstraints{
+        self.elementLabel.snp.makeConstraints {
             $0.centerY.equalTo(self.contentView)
             $0.leading.equalTo(self.contentView).offset(10)
         }
-        
-        self.valueLabel.snp.makeConstraints{
+        self.valueLabel.snp.makeConstraints {
             $0.centerY.equalTo(self.contentView)
             $0.trailing.equalTo(self.contentView).offset(-10)
         }
     }
-
 }

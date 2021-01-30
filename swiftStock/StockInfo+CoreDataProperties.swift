@@ -9,7 +9,6 @@
 import Foundation
 import CoreData
 
-
 extension StockInfo {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<StockInfo> {
