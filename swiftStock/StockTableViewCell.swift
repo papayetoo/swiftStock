@@ -23,7 +23,7 @@ class StockTableViewCell: UITableViewCell {
     // MARK: 회사명칭 UILabel
     var nameLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "Helvetica Neue", size: 20)
+        label.font = UIFont(name: "Helvetica Neue", size: 15)
         label.textColor = .black
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -61,7 +61,7 @@ class StockTableViewCell: UITableViewCell {
     // MARK: 종가 LineChartView
     var closePriceChartView: LineChartView = {
         let chartView = LineChartView()
-        chartView.backgroundColor = .white
+        chartView.backgroundColor = .clear
         chartView.translatesAutoresizingMaskIntoConstraints = false
         chartView.isUserInteractionEnabled = false
         chartView.minOffset = 0
@@ -83,9 +83,10 @@ class StockTableViewCell: UITableViewCell {
     var containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
+        view.isOpaque = false
         view.translatesAutoresizingMaskIntoConstraints = false
         // 경계선 선 두계 변경
-        view.layer.borderWidth = 0.1
+//        view.layer.borderWidth = 0.1
         // 경계선 둥글게
         view.layer.cornerRadius = 10
 
@@ -137,18 +138,22 @@ class StockTableViewCell: UITableViewCell {
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        self.setLayout()
 //        self.contentView.addSubview(self.nameLabel)
 //        self.contentView.addSubview(self.codeLabel)
     }
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        print("init with style, resueIdentifier")
         self.setLayout()
     }
     // MARK: fetchData from Server
 
     // MARK: setLayOut -> 서브뷰 추가 및 레이아웃 설정
     func setLayout() {
+        self.contentView.backgroundColor = .clear
+        self.contentView.isOpaque = false
         self.contentView.addSubview(self.containerView)
         self.containerView.addSubview(self.nameLabel)
         self.containerView.addSubview(self.closePriceChartView)
@@ -158,7 +163,8 @@ class StockTableViewCell: UITableViewCell {
         self.containerView.snp.makeConstraints {
             $0.leading.equalTo(self.contentView).offset(10)
             $0.trailing.equalTo(self.contentView).offset(-10)
-            $0.top.bottom.equalTo(self.contentView)
+            $0.top.equalTo(self.contentView).offset(10)
+            $0.bottom.equalTo(self.contentView).offset(-10)
         }
         // nameLabel Contraints 설정
         self.nameLabel.snp.makeConstraints {
@@ -186,6 +192,8 @@ class StockTableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
+        print("awakeFromNib")
+        self.setLayout()
     }
 
     override func layoutSubviews() {
@@ -195,7 +203,7 @@ class StockTableViewCell: UITableViewCell {
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-        // Configure the view for the selected state
+        // Configure the view for the selected 
     }
 
 }

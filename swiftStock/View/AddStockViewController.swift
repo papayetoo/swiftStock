@@ -11,7 +11,7 @@ import SnapKit
 
 class AddStockViewController: UIViewController {
 
-    private let viewModel = AddStockViewModel()
+    private var viewModel = AddStockViewModel()
 
     private let tableView: UITableView = {
         let view = UITableView()
@@ -43,6 +43,22 @@ class AddStockViewController: UIViewController {
         // Pass the selected object to the new view controller.
     }
     */
+    func handleMarkAsFavourite(code: String) {
+        // 관심 종목 추가에 대해서 동작함
+        // 다만 앱 종료 후 다시 실행시 동작함
+        let context = PersistenceManager.shared.context
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "StockInfo")
+        request.predicate = NSPredicate(format: "code = %@", code)
+        do {
+            guard let oldObjects = try context.fetch(request) as? [NSManagedObject] else {return}
+            _ = oldObjects.map {
+                $0.setValue(true, forKey: "star")
+            }
+            try context.save()
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
 
 }
 
@@ -66,4 +82,40 @@ extension AddStockViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(indexPath.row)
     }
+
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+
+    // MARK: 테이블뷰 셀 스와이프 액션 leading 추가
+//    func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+//        let action = UIContextualAction(style: .normal, title: "Favorite") { [weak self] (_, _, completionHandler) in
+//            self?.handleMarkAsFavourite()
+//            completionHandler(true)
+//        }
+//        action.backgroundColor = .systemBlue
+//        return UISwipeActionsConfiguration(actions: [action])
+//    }
+    // MARK: 테이블뷰 셀 스와이프 액션 traling 추가
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        guard let cell = tableView.cellForRow(at: indexPath) as? AddStockViewCell, let code = cell.code else {return nil}
+        let action = UIContextualAction(style: .normal, title: "추가") { [weak self] (_, _, completionHandler) in
+            // escaping 같은 문법임
+            // 동기적으로 순서가 보장되기 때문에 여기서 실행해야함.
+            self?.handleMarkAsFavourite(code: code)
+            self?.viewModel?.fetchData()
+            tableView.deleteRows(at: [indexPath], with: .left)
+            completionHandler(true)
+        }
+        action.backgroundColor = .systemBlue
+
+        return UISwipeActionsConfiguration(actions: [action])
+    }
+
+//    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+//        if editingStyle == .none {
+//
+//        }
+//
+//    }
 }

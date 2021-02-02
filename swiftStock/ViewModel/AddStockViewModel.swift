@@ -9,26 +9,39 @@ import Foundation
 import CoreData
 
 struct AddStockViewModel {
-    typealias Listener = ([StockInfo]?) -> Void
-    var listener: Listener?
-    var stockInfoData: [StockInfo]? {
-        didSet {
-            listener?(stockInfoData)
-        }
-    }
+
+    var stockInfoData: [StockInfo]?
+    var stockInfoDynamic: Dynamic<[StockInfo]>?
     private let persistentManager = PersistenceManager.shared
 
     init?() {
-        self.stockInfoData = self.fetchData()
+        self.fetchData()
     }
 
-    func fetchData() -> [StockInfo] {
+    mutating func fetchData() {
         let request = NSFetchRequest<NSManagedObject>(entityName: "StockInfo")
-        guard let data = self.persistentManager.fetch(request: request) as? [StockInfo] else {return []}
-        return data
+        request.predicate = NSPredicate(format: "star = %@", NSNumber(booleanLiteral: false))
+        guard let data = self.persistentManager.fetch(request: request) as? [StockInfo] else {return}
+        self.stockInfoData = data
     }
 
-    mutating func bind(listener: Listener?) {
+}
+
+class Dynamic<T> {
+    typealias Listener = (T) -> Void
+    var listener: Listener?
+
+    func bind(_ listener: Listener?) {
         self.listener = listener
+    }
+
+    var value: T {
+        didSet {
+            listener?(value)
+        }
+    }
+
+    init(_ v: T) {
+        self.value = v
     }
 }

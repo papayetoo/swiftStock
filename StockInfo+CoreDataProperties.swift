@@ -2,7 +2,7 @@
 //  StockInfo+CoreDataProperties.swift
 //  
 //
-//  Created by 최광현 on 2021/01/19.
+//  Created by 최광현 on 2021/01/31.
 //
 //
 
@@ -17,4 +17,6 @@ extension StockInfo {
 
     @NSManaged public var code: String?
     @NSManaged public var name: String?
+    @NSManaged public var star: Bool
+
 }

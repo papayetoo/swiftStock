@@ -19,7 +19,8 @@ class StockMainViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.backgroundColor = UIColor.white
+        tableView.isOpaque = false
+        tableView.backgroundColor = .clear
         // tableView 구분선 스타일 결정
         tableView.separatorStyle = .none
         tableView.register(StockTableViewCell.self, forCellReuseIdentifier: "StockCode")
@@ -40,37 +41,33 @@ class StockMainViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the
-        self.view.backgroundColor = .systemBackground
+        // Do any additional setup after loading the uiview
+        print("view Did load")
+        self.view.backgroundColor = .systemGreen
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(self.addButtonTouchUp(_:)))
         self.view.addSubview(self.stockCodeTableView)
         self.stockCodeTableView.snp.makeConstraints({
             $0.leading.trailing.top.bottom.equalTo(self.view).offset(0)
             $0.width.equalTo(self.view.frame.width)
         })
-        // 테스트용 테이블 데이터 설정.
-        self.setTableViewData()
+        // Core Data에서 좋아요 표시된 데이터 가져옴.
+//        self.fetchFromCoreData()
         // 서버에서 데이터 수신
-        // self.fetchData()
+//        self.fetchData()
+    }
 
-        let context = PersistenceManager.shared.persistanceContainer.viewContext
-        let delAllReq = NSBatchDeleteRequest(fetchRequest: NSFetchRequest<NSFetchRequestResult>(entityName: "StockInfo"))
-        do {
-            try context.execute(delAllReq)
-        } catch {
-            print(error)
-        }
-
-//        self.fetchStockInfo()
+    override func viewWillAppear(_ animated: Bool) {
+        print("view will Appear")
+        self.fetchFromCoreData()
     }
 
     // MARK: setTableViewData 테이블 뷰 테스트 데이터
     func setTableViewData() {
         self.tableData.append(StockCode(code: "KOSPI", name: "코스피"))
-        self.tableData.append(StockCode(code: "005930", name: "삼성전자"))
-        self.tableData.append(StockCode(code: "035420", name: "NAVER"))
-        self.tableData.append(StockCode(code: "035720", name: "카카오"))
-        self.tableData.append(StockCode(code: "005380", name: "현대차"))
+//        self.tableData.append(StockCode(code: "005930", name: "삼성전자"))
+//        self.tableData.append(StockCode(code: "035420", name: "NAVER"))
+//        self.tableData.append(StockCode(code: "035720", name: "카카오"))
+//        self.tableData.append(StockCode(code: "005380", name: "현대차"))
     }
 
     // MARK: 서버에서 종가 데이터 받아오는 코드
@@ -98,12 +95,11 @@ class StockMainViewController: UIViewController {
             let contents = try String(contentsOfFile: path)
             _ = contents.components(separatedBy: "\n").map {
                 let csvData = $0.components(separatedBy: ",")
-                // MARK: NSManagedObject를 만든다.
                 let stockInfo = NSManagedObject(entity: entity, insertInto: context)
                 if csvData.count > 2 {
                     stockInfo.setValue(csvData[1], forKey: "code")
                     stockInfo.setValue(csvData[2], forKey: "name")
-                    print(csvData)
+                    stockInfo.setValue(false, forKey: "star")
                 }
             }
             try context.save()
@@ -115,15 +111,63 @@ class StockMainViewController: UIViewController {
         return []
     }
 
-    func fetchStockInfo() {
-        let context = PersistenceManager.shared.persistanceContainer.viewContext
-        do {
+    func updateStockInfo(codes: [String]) {
+        let context = PersistenceManager.shared.context
+        _ = codes.map {
             let request = NSFetchRequest<NSFetchRequestResult>(entityName: "StockInfo")
-            request.predicate = NSPredicate(format: "code = %@", "005930")
-            guard let data = try context.fetch(request) as? [StockInfo] else {return}
-            print(data[0].name)
+            do {
+                request.predicate = NSPredicate(format: "code = %@", $0)
+                let fetchObject = try context.fetch(request)
+                let objToUpdate = fetchObject[0] as? NSManagedObject
+                objToUpdate?.setValue(true, forKey: "star")
+                try context.save()
+                print("update StockInfo star column end.")
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+    }
+
+    func fetchFromCoreData() {
+        let context = PersistenceManager.shared.context
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "StockInfo")
+        request.predicate = NSPredicate(format: "star == %@", NSNumber(booleanLiteral: true))
+        DispatchQueue.global().async {
+            do {
+                guard let fetchedStockInfo = try context.fetch(request) as? [StockInfo] else {return}
+                _ = fetchedStockInfo.map {
+                    guard let code = $0.code, let name = $0.name else {return}
+                    let fetchedData = StockCode(code: code, name: name)
+
+                    if self.tableData.contains(where: {(stockcode) in
+                        return stockcode.companyName == fetchedData.companyName
+                            && stockcode.companyCode == fetchedData.companyCode
+                    }) == false {
+                        print(fetchedData.companyCode, fetchedData.companyName)
+                        self.tableData.append(fetchedData)
+                    }
+                }
+                DispatchQueue.main.async {
+                    self.stockCodeTableView.reloadData()
+                }
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+    }
+
+    func unstarStockInfo(nameToUpdate: String) {
+        let context = PersistenceManager.shared.context
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "StockInfo")
+        request.predicate = NSPredicate(format: "name = %@", nameToUpdate)
+        do {
+            guard let oldObjects = try context.fetch(request) as? [NSManagedObject] else {return}
+            oldObjects.map {
+                $0.setValue(false, forKey: "star")
+            }
+            try context.save()
         } catch {
-            print(error.localizedDescription)
+            print(error)
         }
     }
 
@@ -148,7 +192,6 @@ extension UIColor {
 extension StockMainViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.tableData.count
-//        return 1
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -197,7 +240,7 @@ extension StockMainViewController: UITableViewDelegate {
     }
     // MARK: 섹션 헤더 높이 설정.
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return CGFloat(10)
+        return 0
     }
 //    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
 //        let headerView = UIView()
@@ -212,12 +255,28 @@ extension StockMainViewController: UITableViewDelegate {
         return true
     }
 
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            self.tableData.remove(at: indexPath.row)
-            self.stockCodeTableView.reloadData()
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+
+        let action = UIContextualAction(style: .destructive, title: "삭제") {
+            [weak self] (_, _, completionHandler) in
+            guard let nameToUpdate = self?.tableData[indexPath.row].companyName else {return}
+            self?.tableData.remove(at: indexPath.row)
+            // Invalid update: invalid number of rows in section 0 에러 발생 원인
+            // 테이블 뷰에서 로우를 삭제한뒤 reloadData가 자동호출되는데 dataSource로 드렁온 객체와 갯수가 맞지 않아서
+            // 발생하는 문제임. 문제를 해결하기 위해서는 tableData에서 먼저 삭제한 후에 row를 삭제하면 문제가 해결됨.
+            tableView.deleteRows(at: [indexPath], with: .left)
+            self?.unstarStockInfo(nameToUpdate: nameToUpdate)
+            completionHandler(true)
         }
+        action.backgroundColor = .systemPink
+        return UISwipeActionsConfiguration(actions: [action])
     }
+
+//    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+//        if editingStyle == .delete {
+//            self.tableData.remove(at: indexPath.row)
+//        }
+//    }
 }
 
 extension StockMainViewController: ChartViewDelegate {
