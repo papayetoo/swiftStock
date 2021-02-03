@@ -8,6 +8,7 @@
 import UIKit
 import Charts
 import SnapKit
+import CoreData
 
 class StockChartViewController: UIViewController {
     private let serverURL = URL(string: "http://3.34.96.176:8000")
@@ -331,15 +332,31 @@ class StockChartViewController: UIViewController {
     // MARK: 별 버튼 눌렀을 때 star_fill 과 star_empty로 변경하기 위한 함수
     // TODO: CoreData에 별표 눌렀을 시 즐겨찾기 기능 추가해야함.
     @objc func touchUpStarButton(_ button: UIButton) {
+
+        var isStarFilled: Bool = false
+        print("star touched")
         if self.starButton.currentImage == UIImage(named: "bstar_empty") {
             self.starButton.setImage(UIImage(named: "bstar_filled"), for: .normal)
-            return
+            isStarFilled = true
         }
         if self.starButton.currentImage == UIImage(named: "bstar_filled") {
             self.starButton.setImage(UIImage(named: "bstar_empty"), for: .normal)
-            return
+            isStarFilled = false
         }
 
+        let context = PersistenceManager.shared.context
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "StockInfo")
+        guard let oldObjects = try? context.fetch(request) as? [NSManagedObject] else {return}
+
+        _ = oldObjects.map {
+            $0.setValue(false, forKey: "star")
+        }
+
+        do {
+            try context.save()
+        } catch {
+            print(error.localizedDescription)
+        }
     }
 
     // MARK: 기간 버튼 터치시 컬러 변경

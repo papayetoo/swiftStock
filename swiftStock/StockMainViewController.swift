@@ -43,31 +43,31 @@ class StockMainViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the uiview
         print("view Did load")
-        self.view.backgroundColor = .systemGreen
+        self.view.backgroundColor = .systemGray6
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(self.addButtonTouchUp(_:)))
         self.view.addSubview(self.stockCodeTableView)
         self.stockCodeTableView.snp.makeConstraints({
             $0.leading.trailing.top.bottom.equalTo(self.view).offset(0)
             $0.width.equalTo(self.view.frame.width)
         })
-        // Core Data에서 좋아요 표시된 데이터 가져옴.
-//        self.fetchFromCoreData()
-        // 서버에서 데이터 수신
-//        self.fetchData()
+//        self.unstarStockInfo(nameToUpdate: nil)
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        print("view will Appear")
+        // Core Data에서 좋아요 표시된 데이터 가져옴.
         self.fetchFromCoreData()
+//        self.setTableViewData()
+        // 서버에서 데이터 수신
+//        self.fetchData()
     }
 
     // MARK: setTableViewData 테이블 뷰 테스트 데이터
     func setTableViewData() {
         self.tableData.append(StockCode(code: "KOSPI", name: "코스피"))
-//        self.tableData.append(StockCode(code: "005930", name: "삼성전자"))
-//        self.tableData.append(StockCode(code: "035420", name: "NAVER"))
-//        self.tableData.append(StockCode(code: "035720", name: "카카오"))
-//        self.tableData.append(StockCode(code: "005380", name: "현대차"))
+        self.tableData.append(StockCode(code: "005930", name: "삼성전자"))
+        self.tableData.append(StockCode(code: "035420", name: "NAVER"))
+        self.tableData.append(StockCode(code: "035720", name: "카카오"))
+        self.tableData.append(StockCode(code: "005380", name: "현대차"))
     }
 
     // MARK: 서버에서 종가 데이터 받아오는 코드
@@ -138,7 +138,6 @@ class StockMainViewController: UIViewController {
                 _ = fetchedStockInfo.map {
                     guard let code = $0.code, let name = $0.name else {return}
                     let fetchedData = StockCode(code: code, name: name)
-
                     if self.tableData.contains(where: {(stockcode) in
                         return stockcode.companyName == fetchedData.companyName
                             && stockcode.companyCode == fetchedData.companyCode
@@ -147,19 +146,19 @@ class StockMainViewController: UIViewController {
                         self.tableData.append(fetchedData)
                     }
                 }
-                DispatchQueue.main.async {
-                    self.stockCodeTableView.reloadData()
-                }
+                self.fetchData()
             } catch {
                 print(error.localizedDescription)
             }
         }
     }
 
-    func unstarStockInfo(nameToUpdate: String) {
+    func unstarStockInfo(nameToUpdate: String?) {
         let context = PersistenceManager.shared.context
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: "StockInfo")
-        request.predicate = NSPredicate(format: "name = %@", nameToUpdate)
+        if nameToUpdate != nil {
+            request.predicate = NSPredicate(format: "name = %@", nameToUpdate!)
+        }
         do {
             guard let oldObjects = try context.fetch(request) as? [NSManagedObject] else {return}
             oldObjects.map {
@@ -196,16 +195,16 @@ extension StockMainViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = self.stockCodeTableView.dequeueReusableCell(withIdentifier: "StockCode") as? StockTableViewCell else {return UITableViewCell()}
-        cell.backgroundColor = .white
+        cell.backgroundColor = .clear
         cell.nameLabel.text = self.tableData[indexPath.row].companyName
-        cell.codeLabel.text = self.tableData[indexPath.row].companyCode
+//        cell.codeLabel.text = self.tableData[indexPath.row].companyCode
         if self.closePriceData.count > indexPath.row {
             let currentClosePriceData = self.closePriceData[indexPath.row]
             cell.chartDataEntry = (0..<currentClosePriceData.count).map {
                 return ChartDataEntry(x: Double($0), y: currentClosePriceData[$0])
             }
             guard let lastData = currentClosePriceData.last else {return cell}
-            cell.currentPrice  = lastData
+//            cell.currentPrice  = lastData
             let beforeLastData = currentClosePriceData[currentClosePriceData.endIndex - 2]
             cell.percent = (lastData - beforeLastData) / beforeLastData
             if lastData >= beforeLastData {

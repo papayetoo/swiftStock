@@ -82,7 +82,7 @@ class StockTableViewCell: UITableViewCell {
 
     var containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = .clear
+        view.backgroundColor = .white
         view.isOpaque = false
         view.translatesAutoresizingMaskIntoConstraints = false
         // 경계선 선 두계 변경
@@ -153,7 +153,7 @@ class StockTableViewCell: UITableViewCell {
     // MARK: setLayOut -> 서브뷰 추가 및 레이아웃 설정
     func setLayout() {
         self.contentView.backgroundColor = .clear
-        self.contentView.isOpaque = false
+//        self.contentView.isOpaque = false
         self.contentView.addSubview(self.containerView)
         self.containerView.addSubview(self.nameLabel)
         self.containerView.addSubview(self.closePriceChartView)
@@ -163,8 +163,8 @@ class StockTableViewCell: UITableViewCell {
         self.containerView.snp.makeConstraints {
             $0.leading.equalTo(self.contentView).offset(10)
             $0.trailing.equalTo(self.contentView).offset(-10)
-            $0.top.equalTo(self.contentView).offset(10)
-            $0.bottom.equalTo(self.contentView).offset(-10)
+            $0.top.equalTo(self.contentView)
+            $0.bottom.equalTo(self.contentView)
         }
         // nameLabel Contraints 설정
         self.nameLabel.snp.makeConstraints {
@@ -198,7 +198,7 @@ class StockTableViewCell: UITableViewCell {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        self.contentView.frame = self.contentView.frame.inset(by: UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0))
+        self.contentView.frame = self.contentView.frame.inset(by: UIEdgeInsets(top: 3, left: 0, bottom: 3, right: 0))
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
