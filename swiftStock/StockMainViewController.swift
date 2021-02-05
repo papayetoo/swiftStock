@@ -28,7 +28,7 @@ class StockMainViewController: UIViewController {
     }()
 
     lazy var tableData: [StockCode] = []
-    private let serverURL: URL? = URL(string: "http://3.34.96.176:8000")
+    private let serverURL: URL? = URL(string: "http://3.34.192.214:8000")
     var closePriceData: [[Double]] = [] {
         didSet {
             DispatchQueue.main.async {
@@ -43,7 +43,7 @@ class StockMainViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the uiview
         print("view Did load")
-        self.view.backgroundColor = .systemGray6
+        self.view.backgroundColor = UIColor(red: 123/255, green: 19/255, blue: 242/255, alpha: 0.95)
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(self.addButtonTouchUp(_:)))
         self.view.addSubview(self.stockCodeTableView)
         self.stockCodeTableView.snp.makeConstraints({
@@ -55,19 +55,12 @@ class StockMainViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         // Core Data에서 좋아요 표시된 데이터 가져옴.
+        print("viewWillAppear")
         self.fetchFromCoreData()
-//        self.setTableViewData()
+        _ = self.tableData.map {
+            print($0.companyName)
+        }
         // 서버에서 데이터 수신
-//        self.fetchData()
-    }
-
-    // MARK: setTableViewData 테이블 뷰 테스트 데이터
-    func setTableViewData() {
-        self.tableData.append(StockCode(code: "KOSPI", name: "코스피"))
-        self.tableData.append(StockCode(code: "005930", name: "삼성전자"))
-        self.tableData.append(StockCode(code: "035420", name: "NAVER"))
-        self.tableData.append(StockCode(code: "035720", name: "카카오"))
-        self.tableData.append(StockCode(code: "005380", name: "현대차"))
     }
 
     // MARK: 서버에서 종가 데이터 받아오는 코드
@@ -135,18 +128,11 @@ class StockMainViewController: UIViewController {
         DispatchQueue.global().async {
             do {
                 guard let fetchedStockInfo = try context.fetch(request) as? [StockInfo] else {return}
-                _ = fetchedStockInfo.map {
-                    guard let code = $0.code, let name = $0.name else {return}
-                    let fetchedData = StockCode(code: code, name: name)
-                    if self.tableData.contains(where: {(stockcode) in
-                        return stockcode.companyName == fetchedData.companyName
-                            && stockcode.companyCode == fetchedData.companyCode
-                    }) == false {
-                        print(fetchedData.companyCode, fetchedData.companyName)
-                        self.tableData.append(fetchedData)
-                    }
+                self.tableData = fetchedStockInfo.map { StockCode(code: $0.code!, name: $0.name!)}
+                DispatchQueue.main.async {
+                    self.stockCodeTableView.reloadData()
                 }
-                self.fetchData()
+//                self.fetchData()
             } catch {
                 print(error.localizedDescription)
             }

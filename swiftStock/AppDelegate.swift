@@ -12,29 +12,6 @@ import CoreData
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
-    lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "Data")
-        container.loadPersistentStores(completionHandler: {(storeDescription, error) in
-            if let error = error {
-                fatalError("Unresolved Error, \((error as NSError).code)")
-            }
-        })
-        return container
-    }()
-    
-    func saveContext() {
-        let context = self.persistentContainer.viewContext
-        if context.hasChanges {
-            do{
-                try context.save()
-            }catch {
-                let nsError = error as NSError
-                fatalError("Unresolved Error \(nsError)")
-            }
-        }
-    }
-    
-    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         return true

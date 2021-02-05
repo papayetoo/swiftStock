@@ -20,13 +20,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
         // ToDo: 네비게이션 콘트롤러 색상 문제
+        let homeController = MyTabBarController()
+
         let stockMainViewController = StockMainViewController()
         let navController = UINavigationController(rootViewController: stockMainViewController)
-        navController.navigationBar.isTranslucent = true
-        navController.navigationBar.backgroundColor = .systemGray
-        navController.navigationBar.barTintColor = .systemBackground
-
-        window?.rootViewController = navController
+        // navigationBar 투명 여부 결정
+        navController.navigationBar.isTranslucent = false
+        // navigationBar 색상 결정
+        navController.navigationBar.backgroundColor = .clear
+        // backgroundColor와의 차이점??
+        // 네비게이션바 barTintColor 설정하지 않았다면 navigationBar.backgroundColor가 나옴
+        // barTintColor가 설정되었다면 barTintColor가 나옴.
+        navController.navigationBar.barTintColor = .white
+        // 네비게이션 아이템 컬러
+        navController.navigationBar.tintColor = .systemOrange
+        window?.rootViewController = homeController
         window?.makeKeyAndVisible()
     }
 

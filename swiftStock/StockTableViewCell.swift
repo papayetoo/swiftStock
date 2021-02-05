@@ -10,7 +10,7 @@ import Charts
 import SnapKit
 
 class StockTableViewCell: UITableViewCell {
-    private let serverURL = URL(string: "http://3.34.96.176:8000")
+    private let serverURL = URL(string: "http://3.34.192.214:8000")
 
     // MARK: 코드명칭 UILabel
     var codeLabel: UILabel = {
@@ -86,7 +86,7 @@ class StockTableViewCell: UITableViewCell {
         view.isOpaque = false
         view.translatesAutoresizingMaskIntoConstraints = false
         // 경계선 선 두계 변경
-//        view.layer.borderWidth = 0.1
+        view.layer.borderWidth = 0.01
         // 경계선 둥글게
         view.layer.cornerRadius = 10
 
@@ -153,6 +153,7 @@ class StockTableViewCell: UITableViewCell {
     // MARK: setLayOut -> 서브뷰 추가 및 레이아웃 설정
     func setLayout() {
         self.contentView.backgroundColor = .clear
+        self.containerView.backgroundColor = .white
 //        self.contentView.isOpaque = false
         self.contentView.addSubview(self.containerView)
         self.containerView.addSubview(self.nameLabel)

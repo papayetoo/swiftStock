@@ -9,6 +9,14 @@ import UIKit
 import SnapKit
 
 class ExtraInfoTableViewCell: UITableViewCell {
+    // MARK: 숫자 형식 세자리마다 , 찍어줌
+    private let numberFormatter: NumberFormatter =  {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencySymbol = "₩"
+        return formatter
+    }()
+
     var element: String? {
         didSet {
             self.elementLabel.text = element
@@ -21,9 +29,10 @@ class ExtraInfoTableViewCell: UITableViewCell {
         return label
     }()
 
-    var value: String? {
+    var value: Double? {
         didSet {
-            self.valueLabel.text = value
+            guard let newValue = value else {return}
+            self.valueLabel.text = self.numberFormatter.string(for: newValue)
         }
     }
 

@@ -11,7 +11,8 @@ import SnapKit
 import CoreData
 
 class StockChartViewController: UIViewController {
-    private let serverURL = URL(string: "http://3.34.96.176:8000")
+
+    private let serverURL = URL(string: "http://3.34.192.214:8000")
     private var stockData: StockData? {
         didSet {
             guard let stockData = self.stockData else {return}
@@ -30,6 +31,8 @@ class StockChartViewController: UIViewController {
     }
     var stockCode: StockCode? {
         didSet {
+            print("stockCode new Value set")
+            print(stockCode?.companyCode, stockCode?.companyName)
             self.setChart()
         }
     }
@@ -67,6 +70,7 @@ class StockChartViewController: UIViewController {
     private let extraInfoTableView: UITableView = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.separatorStyle = .none
         return tableView
     }()
 
@@ -111,7 +115,7 @@ class StockChartViewController: UIViewController {
     private let starButton: UIButton = {
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
         button.translatesAutoresizingMaskIntoConstraints = false
-        guard let image = UIImage(named: "bstar_empty") else {return button}
+        guard let image = UIImage(named: "bstar_filled") else {return button}
         button.setImage(image, for: .normal)
         button.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         return button
@@ -333,30 +337,30 @@ class StockChartViewController: UIViewController {
     // TODO: CoreData에 별표 눌렀을 시 즐겨찾기 기능 추가해야함.
     @objc func touchUpStarButton(_ button: UIButton) {
 
-        var isStarFilled: Bool = false
-        print("star touched")
+        var isStarFilled: Bool?
         if self.starButton.currentImage == UIImage(named: "bstar_empty") {
-            self.starButton.setImage(UIImage(named: "bstar_filled"), for: .normal)
             isStarFilled = true
-        }
-        if self.starButton.currentImage == UIImage(named: "bstar_filled") {
-            self.starButton.setImage(UIImage(named: "bstar_empty"), for: .normal)
+            self.starButton.setImage(UIImage(named: "bstar_filled"), for: .normal)
+        } else if self.starButton.currentImage == UIImage(named: "bstar_filled") {
             isStarFilled = false
+            self.starButton.setImage(UIImage(named: "bstar_empty"), for: .normal)
         }
-
+        // Core Data 즐겨찾기 업데이트 위한 코드
         let context = PersistenceManager.shared.context
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: "StockInfo")
-        guard let oldObjects = try? context.fetch(request) as? [NSManagedObject] else {return}
-
-        _ = oldObjects.map {
-            $0.setValue(false, forKey: "star")
-        }
-
+        guard let code = self.stockCode?.companyCode else {return}
+        request.predicate = NSPredicate(format: "code == %@", code)
         do {
+            guard let objects = try context.fetch(request) as? [StockInfo] else {return}
+            _ = objects.map {
+                $0.setValue(isStarFilled, forKey: "star")
+            }
             try context.save()
         } catch {
             print(error.localizedDescription)
         }
+        print("update star end")
+
     }
 
     // MARK: 기간 버튼 터치시 컬러 변경
@@ -425,17 +429,17 @@ extension StockChartViewController: UITableViewDataSource {
         // ["전일 종가", "시가", "고가", "저가", "종가", "거래량"]
         guard let stockData = self.stockData else {return UITableViewCell()}
         if indexPath.row == 0 {
-            cell.value = "\(stockData.closePrice[stockData.closePrice.endIndex - 2])"
+            cell.value = stockData.closePrice[stockData.closePrice.endIndex - 2]
         } else if indexPath.row == 1 {
-            cell.value = "\(stockData.closePrice[stockData.closePrice.endIndex - 1])"
+            cell.value = stockData.closePrice[stockData.closePrice.endIndex - 1]
         } else if indexPath.row == 2 {
-            cell.value = "\(stockData.highPrice[stockData.highPrice.endIndex - 1])"
+            cell.value = stockData.highPrice[stockData.highPrice.endIndex - 1]
         } else if indexPath.row == 3 {
-            cell.value = "\(stockData.lowPrice[stockData.lowPrice.endIndex - 1])"
+            cell.value = stockData.lowPrice[stockData.lowPrice.endIndex - 1]
         } else if indexPath.row == 4 {
-            cell.value = "\(stockData.closePrice[stockData.closePrice.endIndex - 1])"
+            cell.value = stockData.closePrice[stockData.closePrice.endIndex - 1]
         } else if indexPath.row == 5 {
-            cell.value = "\(stockData.volume[stockData.volume.endIndex - 1])"
+            cell.value = Double(stockData.volume[stockData.volume.endIndex - 1])
         }
 
         return cell
