@@ -184,21 +184,32 @@ extension StockMainViewController: UITableViewDataSource {
         cell.backgroundColor = .clear
         cell.nameLabel.text = self.tableData[indexPath.row].companyName
 //        cell.codeLabel.text = self.tableData[indexPath.row].companyCode
-        if self.closePriceData.count > indexPath.row {
+        _ = self.closePriceData.map {_ in
             let currentClosePriceData = self.closePriceData[indexPath.row]
-            cell.chartDataEntry = (0..<currentClosePriceData.count).map {
-                return ChartDataEntry(x: Double($0), y: currentClosePriceData[$0])
+            cell.chartDataEntry = currentClosePriceData.enumerated().map {
+                return ChartDataEntry(x: Double($0), y: $1)
             }
-            guard let lastData = currentClosePriceData.last else {return cell}
-//            cell.currentPrice  = lastData
-            let beforeLastData = currentClosePriceData[currentClosePriceData.endIndex - 2]
-            cell.percent = (lastData - beforeLastData) / beforeLastData
-            if lastData >= beforeLastData {
-                cell.isIncreasing = true
-            } else {
-                cell.isIncreasing = false
-            }
+            guard let lastClosePriceData = currentClosePriceData.last else {return}
+            cell.currentPrice = lastClosePriceData
+            let beforeLastClostPriceData = currentClosePriceData[currentClosePriceData.endIndex - 2]
+            cell.isIncreasing = lastClosePriceData > beforeLastClostPriceData ? true : false
+            cell.percent = (lastClosePriceData - beforeLastClostPriceData) / beforeLastClostPriceData
         }
+//        if self.closePriceData.count > indexPath.row {
+//            let currentClosePriceData = self.closePriceData[indexPath.row]
+//            cell.chartDataEntry = (0..<currentClosePriceData.count).map {
+//                return ChartDataEntry(x: Double($0), y: currentClosePriceData[$0])
+//            }
+//            guard let lastData = currentClosePriceData.last else {return cell}
+//  cell.currentPrice  = lastData
+//            let beforeLastData = currentClosePriceData[currentClosePriceData.endIndex - 2]
+//            cell.percent = (lastData - beforeLastData) / beforeLastData
+//            if lastData >= beforeLastData {
+//                cell.isIncreasing = true
+//            } else {
+//                cell.isIncreasing = false
+//            }
+//        }
         return cell
     }
     // MARK: 테이블 섹션 수 정하는 함수 - UITableViewDataSource

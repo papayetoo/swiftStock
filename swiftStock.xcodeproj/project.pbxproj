@@ -26,6 +26,7 @@
 		008BAA8A25B70AA3009D0C31 /* Data.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 008BAA8825B70AA3009D0C31 /* Data.xcdatamodeld */; };
 		00A6844525B2A9FD00189B19 /* RequestSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A6844425B2A9FD00189B19 /* RequestSender.swift */; };
 		00A839D225A74645000E6B5A /* codes.csv in Resources */ = {isa = PBXBuildFile; fileRef = 00A839D125A74645000E6B5A /* codes.csv */; };
+		00D1500725CE54BE00172279 /* CircularTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D1500625CE54BE00172279 /* CircularTabBar.swift */; };
 		00DED38325AF0248001A4C9B /* SimpleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DED38225AF0248001A4C9B /* SimpleData.swift */; };
 		00EC148B25AC8E390016DAE4 /* StockChartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EC148A25AC8E390016DAE4 /* StockChartViewController.swift */; };
 		00EC148E25AC93C30016DAE4 /* StockCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EC148D25AC93C30016DAE4 /* StockCode.swift */; };
@@ -55,6 +56,7 @@
 		008BAA8925B70AA3009D0C31 /* StockCode.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = StockCode.xcdatamodel; sourceTree = "<group>"; };
 		00A6844425B2A9FD00189B19 /* RequestSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestSender.swift; sourceTree = "<group>"; };
 		00A839D125A74645000E6B5A /* codes.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = codes.csv; sourceTree = "<group>"; };
+		00D1500625CE54BE00172279 /* CircularTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularTabBar.swift; sourceTree = "<group>"; };
 		00DED38225AF0248001A4C9B /* SimpleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleData.swift; sourceTree = "<group>"; };
 		00EC148A25AC8E390016DAE4 /* StockChartViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockChartViewController.swift; sourceTree = "<group>"; };
 		00EC148D25AC93C30016DAE4 /* StockCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockCode.swift; sourceTree = "<group>"; };
@@ -136,6 +138,7 @@
 				0036391E25C175C600ABC69E /* AddStockViewController.swift */,
 				0036392725C1958800ABC69E /* AddStockViewCell.swift */,
 				0060599625C2E27000EA5FF5 /* ExtraInfoTableViewCell.swift */,
+				00D1500625CE54BE00172279 /* CircularTabBar.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -299,6 +302,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				00D1500725CE54BE00172279 /* CircularTabBar.swift in Sources */,
 				007ED07225A340D50056B1D9 /* StockData.swift in Sources */,
 				005D54F825CD74220056BF46 /* MyTabBarController.swift in Sources */,
 				00EC148E25AC93C30016DAE4 /* StockCode.swift in Sources */,

@@ -21,7 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.windowScene = windowScene
         // ToDo: 네비게이션 콘트롤러 색상 문제
         let homeController = MyTabBarController()
-
+        homeController.view.backgroundColor = UIColor(red: 123/255, green: 19/255, blue: 242/255, alpha: 0.95)
         let stockMainViewController = StockMainViewController()
         let navController = UINavigationController(rootViewController: stockMainViewController)
         // navigationBar 투명 여부 결정
