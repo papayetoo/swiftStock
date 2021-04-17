@@ -1,6 +1,5 @@
-![설명](ui이미지.png)
-
 ## PROJECT 소개
+![설명](ui이미지.png)
 
 ---
 
@@ -30,7 +29,7 @@
 
 - Charts 라이브러리 사용방법
 
-[danielgindi/Charts](https://github.com/danielgindi/Charts)
+    [danielgindi/Charts](https://github.com/danielgindi/Charts)
 
 **스킬 및 사용툴**
 
@@ -40,10 +39,8 @@
 
 ---
 
-- 주식 차트 앱 깃허브 링크
+- [주식 차트 앱 링크](https://github.com/papayetoo/swiftStock)
 
-[papayetoo/swiftStock](https://github.com/papayetoo/swiftStock)
+- [주식 차트 앱 중계 서버 링크](https://github.com/papayetoo/swiftStock_Server)
 
-- 주식 차트 앱 중계 서버 링크
 
-[papayetoo/swiftStock_Server](https://github.com/papayetoo/swiftStock_Server)
